@@ -1,0 +1,51 @@
+# This can be execute using the IntelliJ Http Client command line: https://www.jetbrains.com/ijhttp/download/?section=zip-archive
+# or with IntelliJ is that is your IDE of choice for Go.
+
+###
+POST http://localhost:8080/speakers
+Content-Type: application/json
+
+{"name":"Zaphod Beeblebrox","bio": ""}
+
+> {%
+    client.assert(response.status == 201)
+%}
+
+###
+GET http://localhost:8080/speakers
+
+> {%
+    client.assert(response.status == 200)
+    //client.assert(response.body.length > 0)
+
+    client.global.set("id", response.body.map((it, i) => it["id"]))
+
+%}
+
+###
+PUT http://localhost:8080/speakers/{{id}}
+Content-Type: application/json
+
+{"name":"Zaphod Beeblebrox","bio": "Zaphod is just this guy you know"}
+
+> {%
+    client.assert(response.status == 204)
+%}
+
+##
+GET http://localhost:8080/speakers
+
+> {%
+    client.assert(response.status == 200)
+    //client.assert(response.body.length > 0)
+
+    client.global.set("id", response.body.map((it, i) => it["id"]))
+
+%}
+
+###
+DELETE http://localhost:8080/speakers/{{id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
