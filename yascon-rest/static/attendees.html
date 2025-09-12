@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <script>
+            function attendees() {
+                return {
+                    attendees: [],
+                    newAttendee: { name: '' },
+
+                    async fetchAttendees() {
+                        const res = await fetch('/attendees');
+                        this.attendees = await res.json();
+                    },
+
+                    async createAttendee() {
+                        if (!this.newAttendee.name) attendees;
+                        const res = await fetch('/attendees', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newAttendee)
+                        });
+                        this.attendees.push({
+                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
+                            "name": this.newAttendee.name,    
+                            "password": this.newAttendee.password
+                        });
+                        this.newAttendee.name = ''
+                        this.newAttendee.password = 'password'
+                    },
+
+                    async updateAttendee(attendee) {
+                        await fetch(`/attendees/${attendee.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(attendee)
+                        });
+                    },
+
+                    async deleteAttendee(id) {
+                        await fetch(`/attendees/${id}`, { method: 'DELETE' });
+                        this.attendees = this.attendees.filter(i => i.id !== id);
+                    },
+
+                    init() {
+                        this.fetchAttendees();
+                    }   
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div x-data="attendees()">
+            <h2>Attendees</h2>
+            <table>
+                <template x-for="attendee in attendees" :key="attendee.id">
+                    <tr>
+                        <td><input type="text" x-model="attendee.name" @blur="updateAttendee(attendee)"></td>
+                        <td><input type="password" x-model="attendee.password" @blur="updateAttendee(attendee)"></td>    
+                        <td><button @click="deleteAttendee(attendee.id)">Delete</button></td>
+                    </tr>
+                </template>
+                <tr>
+                    <td><input type="text" placeholder="Attendee name" x-model="newAttendee.name"></td>
+                    <td><input type="text" placeholder="password" x-model.number="newAttendee.password"></td>
+                    <td><button @click="createAttendee()">Add</button></td>
+                </tr>    
+            </table>
+        </div>
+    </body>
+</html>

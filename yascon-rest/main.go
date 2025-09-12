@@ -21,39 +21,47 @@ func main() {
   	r := chi.NewRouter()
 
   	r.Get("/venues", yascon.GetVenues(db))
+	r.Get("/venues/{id}", yascon.GetVenue(db))
 	r.Post("/venues", yascon.CreateVenue(db))
 	r.Put("/venues/{id}", yascon.UpdateVenue(db))
 	r.Delete("/venues/{id}", yascon.DeleteVenue(db))
 
 	r.Get("/speakers", yascon.GetSpeakers(db))
+	r.Get("/speakers/{id}", yascon.GetSpeaker(db))
 	r.Post("/speakers", yascon.CreateSpeaker(db))
 	r.Put("/speakers/{id}", yascon.UpdateSpeaker(db))
 	r.Delete("/speakers/{id}", yascon.DeleteSpeaker(db))
 
-	r.Get("/session-times", yascon.GetSessionTimes(db))
-	r.Post("/session-times", yascon.CreateSessionTime(db))
-	r.Put("/session-times/{id}", yascon.UpdateSessionTime(db))
-	r.Delete("/session-times/{id}", yascon.DeleteSessionTime(db))
-
 	r.Get("/sessions", yascon.GetSessions(db))
+	r.Get("/sessions/{id}", yascon.GetSession(db))
 	r.Post("/sessions", yascon.CreateSession(db))
 	r.Put("/sessions/{id}", yascon.UpdateSession(db))
 	r.Delete("/sessions/{id}", yascon.DeleteSession(db))
 
 	r.Get("/presentations", yascon.GetPresentations(db))
+	r.Get("/presentations/{id}", yascon.GetPresentation(db))
 	r.Post("/presentations", yascon.CreatePresentation(db))
 	r.Put("/presentations/{id}", yascon.UpdatePresentation(db))
 	r.Delete("/presentations/{id}", yascon.DeletePresentation(db))
 
-	r.Get("/attendee-sessions", yascon.GetAttendeeSessions(db))
-	r.Post("/attendee-sessions", yascon.CreateAttendeeSession(db))
-	r.Put("/attendee-sessions/{id}", yascon.UpdateAttendeeSession(db))
-	r.Delete("/attendee-sessions/{id}", yascon.DeleteAttendeeSession(db))
-
 	r.Get("/attendees", yascon.GetAttendees(db))
+	r.Get("/attendees/{id}", yascon.GetAttendee(db))
 	r.Post("/attendees", yascon.CreateAttendee(db))
 	r.Put("/attendees/{id}", yascon.UpdateAttendee(db))
 	r.Delete("/attendees/{id}", yascon.DeleteAttendee(db))
+
+	r.Get("/attendees/{attendee-id}/sessions", yascon.SessionsForAttendee(db))
+	r.Get("/sessions/{session-id}/attendees", yascon.AttendeesForSession(db))
+
+	r.Put("/attendees/{attendee-id}/sessions/{session-id}", yascon.CreateAttendeeSession(db))
+	r.Put("/sessions/{session-id}/attendees/{attendee-id}", yascon.CreateAttendeeSession(db))
+	
+	r.Delete("/attendees/{attendee-id}/sessions/{session-id}", yascon.DeleteAttendeeSession(db))
+	r.Delete("/sessions/{session-id}/attendees/{attendee-id}", yascon.DeleteAttendeeSession(db))
+
+	fileServer := http.FileServer(http.Dir("./static"))
+
+	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
 	log.Println("Server running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))

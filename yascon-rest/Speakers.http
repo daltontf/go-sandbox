@@ -9,6 +9,7 @@ Content-Type: application/json
 
 > {%
     client.assert(response.status == 201)
+    client.assert(response.headers.valueOf("Location").startsWith("/speakers/"))
 %}
 
 ###
@@ -37,6 +38,7 @@ GET http://localhost:8080/speakers
 
 > {%
     client.assert(response.status == 200)
+    client.assert(response.headers["Location"].startsWith("/speakers/"))
     //client.assert(response.body.length > 0)
 
     client.global.set("id", response.body.map((it, i) => it["id"]))

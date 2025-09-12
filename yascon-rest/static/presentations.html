@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <script>
+            function presentations() {
+                return {
+                    presentations: [],
+                    newPresentation: { name: '', speakers_id: -1},
+                    selectedSpeakerName: '',
+                    speakers: [],
+
+                    async fetchPresentations() {
+                        const res = await fetch('/presentations?speaker=name');
+                        this.presentations = await res.json();
+                    },
+
+                    async fetchSpeakers() {
+                        const res = await fetch('/speakers');
+                        this.speakers = await res.json();
+                    },
+
+                    async createPresentation() {
+                        if (!this.newPresentation.name) presentations;
+
+                        const res = await fetch('/presentations', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newPresentation)
+                        });
+
+                        this.presentations.push({
+                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
+                            "name": this.newPresentation.name,    
+                            "description": this.newPresentation.description,
+                            "speaker": {
+                                "name": this.selectedSpeakerName
+                            } 
+                        });
+                        this.newPresentation.name = ''
+                        this.newPresentation.description = ''
+                        this.newPresentation.speaker.name = ''
+                    },
+
+                    async updatePresentation(presentation) {
+                        await fetch(`/presentations/${presentation.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(presentation)
+                        });
+                    },
+
+                    async deletePresentation(id) {
+                        await fetch(`/presentations/${id}`, { method: 'DELETE' });
+                        this.presentations = this.presentations.filter(i => i.id !== id);
+                    },
+
+                    init() {
+                        this.fetchPresentations();
+                        this.fetchSpeakers();
+                    }   
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div x-data="presentations()">
+            <h2>Presentations</h2>
+            <table>
+                <template x-for="presentation in presentations" :key="presentation.id">
+                    <tr>
+                        <td><input type="text" x-model="presentation.name" @blur="updatePresentation(presentation)"></td>
+                        <td><input type="text" x-model="presentation.description" @blur="updatePresentation(presentation)"></td>  
+                        <td><input type="text" x-model="presentation.speaker.name" readonly></td>    
+                        <td><button @click="deletePresentation(presentation.id)">Delete</button></td>
+                    </tr>
+                </template>
+                <tr>
+                    <td><input type="text" placeholder="Presentation name" x-model="newPresentation.name"></td>
+                    <td><input type="text" placeholder="description" x-model="newPresentation.description"></td>
+                    <td>
+                        <select x-ref="speakerSelect" x-model.number="newPresentation.speakers_id" @change="selectedSpeakerName = $refs.speakerSelect.options[$refs.speakerSelect.selectedIndex].text">
+                            <option value="0"></option>
+                            <template x-for="speaker in speakers" :key="speaker.id">
+                              <option :value="speaker.id" x-text="speaker.name"></option>
+                            </template>
+                          </select>
+                    </td>
+                    <td><button @click="createPresentation()">Add</button></td>
+                </tr>    
+            </table>
+        </div>
+    </body>
+</html>

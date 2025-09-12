@@ -1,0 +1,93 @@
+openapi: 3.0.4
+info:
+  title: YASCON - Yet Another Software Convention
+paths:
+  /venues
+  /attendees
+  /
+
+components:
+  schemas:
+    Attendee:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        Name:
+          type: string
+        Password:
+          type: string
+    AttendeeSession:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64 
+        Attendee_ID:
+          type: integer
+          format: int64
+        Session_ID:
+          type: integer
+          format: int64        
+    Presentation:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        Name:
+          type: string
+        Description:
+          type: string    
+    Session:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        SessionTime_ID:
+          type: integer
+          format: int64
+        Presentation_ID:
+          type: integer
+          format: int64    
+        Speaker_ID:
+          type: integer
+          format: int64    
+        Venue_ID:
+          type: integer
+          format: int64     
+    SessionTime:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        StartTimeSecs:
+          type: integer
+          format: int64
+        DurationSecs:
+          type: integer      
+    Speaker:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        Name:
+          type: string
+        Bio:
+          type: string
+        Picture:
+    Venue:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        Name:
+          type: string  
+        Capacity:
+          type: integer
+  

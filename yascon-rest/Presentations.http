@@ -1,50 +1,62 @@
-# This can be execute using the IntelliJ Http Client command line: https://www.jetbrains.com/ijhttp/download/?section=zip-archive
-# or with IntelliJ is that is your IDE of choice for Go.
+
+###
+POST http://localhost:8080/speakers
+Content-Type: application/json
+
+{"name":"George Carlin","bio": ""}
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("speaker_id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
 
 ###
 POST http://localhost:8080/presentations
 Content-Type: application/json
 
-{"name":"How to Turn Unbearable Pain into Extra Income","description": ""}
+{"name":"How to Turn Unbearable Pain into Extra Income"
+,"description": ""
+,"speakers_id": {{speaker_id}}
+}   
 
 > {%
     client.assert(response.status == 201)
+    client.global.set("presentation_id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
 %}
 
 ###
-GET http://localhost:8080/presentations
-
-> {%
-    client.assert(response.status == 200)
-    //client.assert(response.body.length > 0)
-
-    client.global.set("id", response.body.map((it, i) => it["id"]))
-
-%}
-
-###
-PUT http://localhost:8080/presentations/{{id}}
+GET http://localhost:8080/presentations/{{presentation_id}}
 Content-Type: application/json
 
-{"name":"How to Turn Unbearable Pain into Extra Income","description": "From George Carlin"}
-
-> {%
-    client.assert(response.status == 204)
-%}
-
-##
-GET http://localhost:8080/presentations
-
 > {%
     client.assert(response.status == 200)
-    //client.assert(response.body.length > 0)
-
-    client.global.set("id", response.body.map((it, i) => it["id"]))
-
 %}
 
 ###
-DELETE http://localhost:8080/presentations/{{id}}
+GET http://localhost:8080/presentations?speaker=name
+Content-Type: application/json
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+GET http://localhost:8080/presentations/1?speaker=name
+Content-Type: application/json
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/presentations/{{presentation_id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/speakers/{{speaker_id}}
 
 > {%
     client.assert(response.status == 200)

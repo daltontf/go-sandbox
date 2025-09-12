@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <script>
+            function sessions() {
+                return {
+                    sessions: [],
+                    newSession: { name: '', presentation: {}, venue: {}},
+                    selectedPresentationName: '',
+                    presentations: [],
+                    venues: [],
+                    selectedVenueName: '',
+
+                    async fetchSessions() {
+                        const res = await fetch('/sessions?venue=name&presentation=name');
+                        this.sessions = await res.json();
+                    },
+
+                    async fetchPresentations() {
+                        const res = await fetch('/presentations');
+                        this.presentations = await res.json();
+                    },
+
+                    async fetchVenues() {
+                        const res = await fetch('/venues');
+                        this.venues = await res.json();
+                    },
+
+                    async createSession() {
+                        if (!this.newSession.name) sessions;
+
+                        const res = await fetch('/sessions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newSession)
+                        });
+
+                        this.sessions.push({
+                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
+                            "name": this.newSession.name,    
+                            "description": this.newSession.description,
+                            "presentation": {
+                                "name": this.selectedPresentationName
+                            },
+                            "venue": {
+                                "name": this.selectedVenueName
+                            } 
+                        });
+                    },
+
+                    async updateSession(session) {
+                        await fetch(`/sessions/${session.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(session)
+                        });
+                    },
+
+                    async deleteSession(id) {
+                        await fetch(`/sessions/${id}`, { method: 'DELETE' });
+                        this.sessions = this.sessions.filter(i => i.id !== id);
+                    },
+
+                    init() {
+                        this.fetchSessions()
+                        this.fetchPresentations()
+                        this.fetchVenues()
+                    }   
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div x-data="sessions()">
+            <h2>Sessions</h2>
+            <table>
+                <template x-for="session in sessions" :key="session.id">
+                    <tr>
+                        <td><input type="text" x-model="session.presentation.name" readonly></td>   
+                        <td><input type="text" x-model="session.venue.name" readonly></td>    
+                        <td><button @click="deleteSession(session.id)">Delete</button></td>
+                    </tr>
+                </template>
+                <tr>
+                    <td>
+                        <select x-ref="presentationSelect" x-model.number="newSession.presentations_id" @change="selectedPresentationName = $refs.presentationSelect.options[$refs.presentationSelect.selectedIndex].text">
+                            <option value="0"></option>
+                            <template x-for="presentation in presentations" :key="presentation.id">
+                              <option :value="presentation.id" x-text="presentation.name"></option>
+                            </template>
+                          </select>
+                    </td>
+                    <td>
+                        <select x-ref="venueSelect" x-model.number="newSession.venues_id" @change="selectedVenueName = $refs.venueSelect.options[$refs.venueSelect.selectedIndex].text">
+                            <option value="0"></option>
+                            <template x-for="venue in venues" :key="venue.id">
+                              <option :value="venue.id" x-text="venue.name"></option>
+                            </template>
+                          </select>
+                    </td>
+                    <td><button @click="createSession()">Add</button></td>
+                </tr>    
+            </table>
+        </div>
+    </body>
+</html>

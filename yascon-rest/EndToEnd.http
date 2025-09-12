@@ -1,0 +1,110 @@
+###
+POST http://localhost:8080/attendees
+Content-Type: application/json
+
+{"name":"Joe Bagodonuts", "password": "#@#@%!"}
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("attendee1-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+###
+POST http://localhost:8080/attendees
+Content-Type: application/json
+
+{"name":"Sam Bagodonuts", "password": "@#@%!#"}
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("attendee2-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+###
+POST http://localhost:8080/speakers
+Content-Type: application/json
+
+{"name":"George Carlin","bio": ""}
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("speaker-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+###
+POST http://localhost:8080/presentations
+Content-Type: application/json
+
+{"name":"How to Turn Unbearable Pain into Extra Income"
+,"description": ""
+,"speakers_id": {{speaker-id}}
+}   
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("presentation-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+###
+POST http://localhost:8080/venues
+Content-Type: application/json
+
+{"name":"Jungle Room","capacity": 100}
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("venue-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+###
+< {% 
+   client.global.set("start-time-secs", Math.floor(new Date().getTime() / 1000))
+ %}
+POST http://localhost:8080/sessions
+Content-Type: application/json
+
+{
+    "presentations_id": {{presentation-id}},
+    "venues_id": {{venue-id}}
+}
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("session-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+###
+PUT http://localhost:8080/attendees/{{attendee1-id}}/sessions/{{session-id}}
+Content-Type: application/json
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("attendee-session-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+###
+PUT http://localhost:8080/sessions/{{session-id}}/attendees/{{attendee2-id}}
+Content-Type: application/json
+
+> {%
+    client.assert(response.status == 201)
+    client.global.set("attendee-session-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
+%}
+
+
+###
+GET http://localhost:8080/sessions/{{session-id}}/attendees
+
+> {%
+    client.assert(response.status == 200)
+    client.assert(response.body.length == 2)
+%}
+
+
+###
+GET http://localhost:8080/attendees/{{attendee1-id}}/sessions
+
+> {%
+    client.assert(response.status == 200)
+    client.assert(response.body.length == 1)
+%}
