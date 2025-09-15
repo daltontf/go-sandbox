@@ -53,6 +53,10 @@
         <div x-data="attendees()">
             <h2>Attendees</h2>
             <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Password</th>
+                </tr>
                 <template x-for="attendee in attendees" :key="attendee.id">
                     <tr>
                         <td><input type="text" x-model="attendee.name" @blur="updateAttendee(attendee)"></td>

@@ -65,7 +65,9 @@ Content-Type: application/json
 
 {
     "presentations_id": {{presentation-id}},
-    "venues_id": {{venue-id}}
+    "venues_id": {{venue-id}},
+    "start_time_min": 29299187,
+    "duration_mins": 60
 }
 
 > {%

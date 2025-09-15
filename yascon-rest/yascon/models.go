@@ -31,16 +31,16 @@ type PresentationWithSpeaker struct {
 
 type Session struct {
 	ID       		 int `json:"id"`		
-	StartTimeSecs	 int `json:"start_time_secs"`	
-	DurationSecs	 int `json:"duration_secs"`	
+	StartTimeMin	 int `json:"start_time_min"`	
+	DurationMins	 int `json:"duration_mins"`	
 	Presentations_ID int `json:"presentations_id"`
 	Venues_ID 		 int `json:"venues_id"`	
 }
 
 type SessionWithPresentationAndVenue struct {
 	ID       		 int `json:"id"`		
-	StartTimeSecs	 int `json:"start_time_secs"`	
-	DurationSecs	 int `json:"duration_secs"`	
+	StartTimeMin	 int `json:"start_time_min"`	
+	DurationMins	 int `json:"duration_mins"`	
 	Presentation     Presentation `json:"presentation" gorm:"embedded;embeddedPrefix:presentation_"` 
 	Venue 		 	 Venue `json:"venue" gorm:"embedded;embeddedPrefix:venue_"` 
 }
@@ -100,8 +100,8 @@ func CreateTablesIfNotExists(db *gorm.DB) {
 
 	db.Exec(`CREATE TABLE IF NOT EXISTS Sessions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		start_time_secs INTEGER NOT NULL,
-		duration_secs INTEGER NOT NULL,
+		start_time_min INTEGER NOT NULL,
+		duration_mins INTEGER NOT NULL,
 		PRESENTATIONS_ID INTEGER,		
 		VENUES_ID INTEGER NOT NULL,
 		FOREIGN KEY (PRESENTATIONS_ID) REFERENCES Presentations(id),		

@@ -53,6 +53,10 @@
         <div x-data="venues()">
             <h2>Venues</h2>
             <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Capacity</th>
+                </tr>
                 <template x-for="venue in venues" :key="venue.id">
                     <tr>
                         <td><input type="text" x-model="venue.name" @blur="updateVenue(venue)"></td>

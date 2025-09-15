@@ -67,6 +67,11 @@
         <div x-data="presentations()">
             <h2>Presentations</h2>
             <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Speaker Name</th>
+                </tr>
                 <template x-for="presentation in presentations" :key="presentation.id">
                     <tr>
                         <td><input type="text" x-model="presentation.name" @blur="updatePresentation(presentation)"></td>
