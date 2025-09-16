@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="./content.css"/>
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
         <script>
             function venues() {
@@ -52,10 +53,10 @@
     <body>
         <div x-data="venues()">
             <h2>Venues</h2>
-            <table>
+            <table width="80%">
                 <tr>
-                    <th>Name</th>
-                    <th>Capacity</th>
+                    <th width="34%">Name</th>
+                    <th width="6%">Capacity</th>
                 </tr>
                 <template x-for="venue in venues" :key="venue.id">
                     <tr>

@@ -35,9 +35,9 @@ Content-Type: application/json
 POST http://localhost:8080/presentations
 Content-Type: application/json
 
-{"name":"How to Turn Unbearable Pain into Extra Income"
-,"description": ""
-,"speakers_id": {{speaker-id}}
+{"name":"How to Turn Unbearable Pain into Extra Income",
+"description": "",
+"speakers_id": {{speaker-id}}
 }   
 
 > {%
@@ -81,7 +81,6 @@ Content-Type: application/json
 
 > {%
     client.assert(response.status == 201)
-    client.global.set("attendee-session-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
 %}
 
 ###
@@ -90,7 +89,6 @@ Content-Type: application/json
 
 > {%
     client.assert(response.status == 201)
-    client.global.set("attendee-session-id", parseInt(response.headers.valueOf("Location").match(/(\d+)$/)[1]))
 %}
 
 
@@ -109,4 +107,60 @@ GET http://localhost:8080/attendees/{{attendee1-id}}/sessions
 > {%
     client.assert(response.status == 200)
     client.assert(response.body.length == 1)
+%}
+
+###
+DELETE  http://localhost:8080/attendees/{{attendee1-id}}/sessions/{{session-id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/sessions/{{session-id}}/attendees/{{attendee2-id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/sessions/{{session-id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/presentations/{{presentation-id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/speakers/{{speaker-id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/venues/{{venue-id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/attendees/{{attendee1-id}}
+
+> {%
+    client.assert(response.status == 200)
+%}
+
+###
+DELETE http://localhost:8080/attendees/{{attendee2-id}}
+
+> {%
+    client.assert(response.status == 200)
 %}

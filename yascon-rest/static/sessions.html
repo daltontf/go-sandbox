@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="./content.css"/>
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -99,12 +100,12 @@
     <body>
         <div x-data="sessions()">
             <h2>Sessions</h2>
-            <table>
+            <table width="80%">
                 <tr>
-                    <th>Presentation Name</th>
-                    <th>Venue Name</th>
-                    <th>Start Date/Time</th>
-                    <th>Duration Minutes</th>
+                    <th width="70%">Presentation Name</th>
+                    <th width="15%">Venue Name</th>
+                    <th width="15%">Start Date/Time</th>
+                    <th width="3%">Duration Minutes</th>
                 </tr>
                 <template x-for="session in sessions" :key="session.id">
                     <tr>

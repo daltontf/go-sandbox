@@ -282,8 +282,8 @@ func UpdatePresentation(db *gorm.DB) http.HandlerFunc {
 
 func CreateAttendeeSession(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		attendeeId, _ :=  strconv.Atoi(chi.URLParam(r, "attendee-id"))
-		sessionId, _ := strconv.Atoi(chi.URLParam(r, "session-id"))
+		attendeeId, _ :=  strconv.Atoi(chi.URLParam(r, "attendees_id"))
+		sessionId, _ := strconv.Atoi(chi.URLParam(r, "sessions_id"))
 		res := AttendeeSession {
 			Attendees_ID: attendeeId,
 			Sessions_ID: sessionId,
@@ -302,16 +302,28 @@ func CreateAttendeeSession(db *gorm.DB) http.HandlerFunc {
 }
 
 func DeleteAttendeeSession(db *gorm.DB) http.HandlerFunc {
-	return deleteById[AttendeeSession](db)
+	return func(w http.ResponseWriter, r *http.Request) {
+		attendeesId := chi.URLParam(r, "attendees_id")
+		sessionsId := chi.URLParam(r, "sessions_id")
+
+		ctx := context.Background()
+
+		_, err := gorm.G[AttendeeSession](db).Where("attendees_id = ? and sessions_id = ?", attendeesId, sessionsId).Delete(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 func SessionsForAttendee(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
 
-		attendeeId :=  chi.URLParam(r, "attendee-id")
+		attendeesId :=  chi.URLParam(r, "attendees_id")
 
-		attendeeSessions, err := gorm.G[AttendeeSession](db).Where("attendees_id = ?", attendeeId).Find(ctx)
+		attendeeSessions, err := gorm.G[AttendeeSession](db).Where("attendees_id = ?", attendeesId).Find(ctx)
 
 		w.Header().Set("Content-Type", "application/json")
 		if err != nil {
@@ -327,9 +339,9 @@ func AttendeesForSession(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
 
-		sessionId := chi.URLParam(r, "session-id")
+		sessionsId := chi.URLParam(r, "sessions_id")
 
-		attendeeSessions, err := gorm.G[AttendeeSession](db).Where("sessions_id = ?", sessionId).Find(ctx)
+		attendeeSessions, err := gorm.G[AttendeeSession](db).Where("sessions_id = ?", sessionsId).Find(ctx)
 
 		w.Header().Set("Content-Type", "application/json")
 		if err != nil {

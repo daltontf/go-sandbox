@@ -7,10 +7,11 @@ import (
 	"main/yascon"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
+	"os"
 )
 
 func main() {
-	db, err := gorm.Open(sqlite.Open("yascon.db"))
+	db, err := gorm.Open(sqlite.Open(os.Args[1] + ".db"))
 	if err != nil {
 	  panic(err)
 	}
@@ -50,14 +51,14 @@ func main() {
 	r.Put("/attendees/{id}", yascon.UpdateAttendee(db))
 	r.Delete("/attendees/{id}", yascon.DeleteAttendee(db))
 
-	r.Get("/attendees/{attendee-id}/sessions", yascon.SessionsForAttendee(db))
-	r.Get("/sessions/{session-id}/attendees", yascon.AttendeesForSession(db))
+	r.Get("/attendees/{attendees_id}/sessions", yascon.SessionsForAttendee(db))
+	r.Get("/sessions/{sessions_id}/attendees", yascon.AttendeesForSession(db))
 
-	r.Put("/attendees/{attendee-id}/sessions/{session-id}", yascon.CreateAttendeeSession(db))
-	r.Put("/sessions/{session-id}/attendees/{attendee-id}", yascon.CreateAttendeeSession(db))
+	r.Put("/attendees/{attendees_id}/sessions/{sessions_id}", yascon.CreateAttendeeSession(db))
+	r.Put("/sessions/{sessions_id}/attendees/{attendees_id}", yascon.CreateAttendeeSession(db))
 	
-	r.Delete("/attendees/{attendee-id}/sessions/{session-id}", yascon.DeleteAttendeeSession(db))
-	r.Delete("/sessions/{session-id}/attendees/{attendee-id}", yascon.DeleteAttendeeSession(db))
+	r.Delete("/attendees/{attendees_id}/sessions/{sessions_id}", yascon.DeleteAttendeeSession(db))
+	r.Delete("/sessions/{sessions_id}/attendees/{attendees_id}", yascon.DeleteAttendeeSession(db))
 
 	fileServer := http.FileServer(http.Dir("./static"))
 

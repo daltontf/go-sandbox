@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="./content.css"/>
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
         <script>
             function speakers() {
@@ -52,10 +53,10 @@
     <body>
         <div x-data="speakers()">
             <h2>Speakers</h2>
-            <table>
+            <table width="80%">
                 <tr>
-                    <th>Name</th>
-                    <th>Bio</th>
+                    <th width="20%">Name</th>
+                    <th width="80%">Bio</th>
                 </tr>
                 <template x-for="speaker in speakers" :key="speaker.id">
                     <tr>
