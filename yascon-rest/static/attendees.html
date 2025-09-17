@@ -42,6 +42,10 @@
                         this.attendees = this.attendees.filter(i => i.id !== id);
                     },
 
+                    attendeeSessions(id) {
+                        window.location.href=`./attendee.html?${id}`     
+                    },
+
                     init() {
                         this.fetchAttendees();
                     }   
@@ -60,7 +64,8 @@
                 <template x-for="attendee in attendees" :key="attendee.id">
                     <tr>
                         <td><input type="text" x-model="attendee.name" @blur="updateAttendee(attendee)"></td>
-                        <td><input type="password" x-model="attendee.password" @blur="updateAttendee(attendee)"></td>    
+                        <td><input type="password" x-model="attendee.password" @blur="updateAttendee(attendee)"></td>  
+                        <td><button @click="attendeeSessions(attendee.id)">Sessions</button></td>  
                         <td><button @click="deleteAttendee(attendee.id)">Delete</button></td>
                     </tr>
                 </template>

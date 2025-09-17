@@ -176,9 +176,9 @@ func UpdateSession(db *gorm.DB) http.HandlerFunc {
 
 func GetSessionsWithPresentationAndVenue(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var sessionsWithPresentationAndVenue []SessionWithPresentationAndVenue
+		sessionsWithPresentationAndVenue := []SessionWithPresentationAndVenue{}
 		// TODO handle more than assumeing presentation and venue 
-		db.Model(&Session{}).
+		result := db.Model(&Session{}).
 		Select("sessions.*, presentations.id as presentation_id, presentations.name as presentation_name, venues.id as venue_id, venues.name as venue_name").
 		Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
 		Joins("JOIN venues ON sessions.venues_id = venues.id").
@@ -186,26 +186,33 @@ func GetSessionsWithPresentationAndVenue(db *gorm.DB) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 
-		if sessionsWithPresentationAndVenue != nil {
+		if result.Error == nil {
 			json.NewEncoder(w).Encode(sessionsWithPresentationAndVenue)
+		} else {
+			http.Error(w, result.Error.Error(), 500)
 		}
 	}
 }
 
 func GetSessionWithPresentationAndVenue(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+
 		var sessionWithPresentationAndVenue SessionWithPresentationAndVenue
 		// TODO handle more than assumeing presentation and venue 
-		error := db.Model(&Session{}).
+		result := db.Model(&Session{}).
     		Select("sessions.*, presentations.id as presentation_id, presentations.name as presentation_name, venues.id as venue_id, venues.name as venue_name").
     		Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
 			Joins("JOIN venues ON sessions.venues_id = venues.id").
+			Where("sessions.id = ?", id).
     		First(&sessionWithPresentationAndVenue)
 
 		w.Header().Set("Content-Type", "application/json")
 
-		if error != nil {
+		if result.Error == nil {
 			json.NewEncoder(w).Encode(sessionWithPresentationAndVenue)
+		} else {
+			http.Error(w, result.Error.Error(), 500)
 		}
 	}
 }
@@ -213,17 +220,19 @@ func GetSessionWithPresentationAndVenue(db *gorm.DB) http.HandlerFunc {
 
 func GetPresentationsWithSpeaker(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var presentationsWithSpeaker []PresentationWithSpeaker
+		presentationsWithSpeaker := []PresentationWithSpeaker{}
 		// TODO handle more than assumeing name 
-		db.Model(&Presentation{}).
+		result := db.Model(&Presentation{}).
 			Select("presentations.*, speakers.id as speaker_id, speakers.name as speaker_name").
 			Joins("JOIN speakers ON presentations.speakers_id = speakers.id").
     		Scan(&presentationsWithSpeaker)
 
 		w.Header().Set("Content-Type", "application/json")
 
-		if presentationsWithSpeaker != nil {
+		if result.Error == nil {
 			json.NewEncoder(w).Encode(presentationsWithSpeaker)
+		} else {
+			http.Error(w, result.Error.Error(), 500)
 		}
 		
 	}
@@ -231,17 +240,22 @@ func GetPresentationsWithSpeaker(db *gorm.DB) http.HandlerFunc {
 
 func GetPresentationWithSpeaker(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+
 		var presentationWithSpeaker PresentationWithSpeaker
 		// TODO handle more than assumeing name 
-		error := db.Model(&Presentation{}).
+		result := db.Model(&Presentation{}).
     		Select("presentations.*, speakers.id as speaker_id, speakers.name as speaker_name").
     		Joins("JOIN speakers ON presentations.speakers_id = speakers.id").
+			Where("presentations.id = ?", id).
     		First(&presentationWithSpeaker)
 
 		w.Header().Set("Content-Type", "application/json")
 
-		if error != nil {
+		if result.Error == nil {
 			json.NewEncoder(w).Encode(presentationWithSpeaker)
+		} else {
+			http.Error(w, result.Error.Error(), 500)
 		}
 	}
 }
@@ -319,37 +333,49 @@ func DeleteAttendeeSession(db *gorm.DB) http.HandlerFunc {
 
 func SessionsForAttendee(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.Background()
-
 		attendeesId :=  chi.URLParam(r, "attendees_id")
+		
+		sessionsWithPresentationAndVenue := []SessionWithPresentationAndVenue{}
+		
+		result := db.Model(&Session{}).
+			Select("sessions.*, presentations.id as presentation_id, presentations.name as presentation_name, venues.id as venue_id, venues.name as venue_name").
+			Joins("JOIN attendee_sessions ON attendee_sessions.sessions_id = sessions.id").
+			Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
+			Joins("JOIN venues ON sessions.venues_id = venues.id").
+			Where("attendee_sessions.attendees_id = ?", attendeesId).			
+    		Scan(&sessionsWithPresentationAndVenue)
 
-		attendeeSessions, err := gorm.G[AttendeeSession](db).Where("attendees_id = ?", attendeesId).Find(ctx)
 
 		w.Header().Set("Content-Type", "application/json")
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
+		if result.Error == nil {
+			json.NewEncoder(w).Encode(sessionsWithPresentationAndVenue)
+		} else {
+			http.Error(w, result.Error.Error(), 500)
+			return	
 		}
-
-		json.NewEncoder(w).Encode(attendeeSessions)
 	}	
 }
 
 func AttendeesForSession(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.Background()
-
 		sessionsId := chi.URLParam(r, "sessions_id")
 
-		attendeeSessions, err := gorm.G[AttendeeSession](db).Where("sessions_id = ?", sessionsId).Find(ctx)
+	 	attendees := []Attendee{}
+		
+		result := db.Model(&Attendee{}).
+			Select("attendees.*").
+			Joins("JOIN attendee_sessions ON attendee_sessions.attendees_id = attendees.id").
+			Where("attendee_sessions.sessions_id = ?", sessionsId).			
+    		Scan(&attendees)
+
 
 		w.Header().Set("Content-Type", "application/json")
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
+		if result.Error == nil {
+			json.NewEncoder(w).Encode(attendees)
+		} else {
+			http.Error(w, result.Error.Error(), 500)
+			return	
 		}
-
-		json.NewEncoder(w).Encode(attendeeSessions)
 	}	
 }
 

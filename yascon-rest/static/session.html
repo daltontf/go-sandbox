@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="./content.css"/>
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <script>
+            function session() {
+                return {
+                    session: { presentation: { name: ''} , venue: { name: ""}},
+                    attendees: [],
+                    sessionAttendees: [],
+                    newAttendeeSession: { },
+
+                    async fetchSession() {
+                        const res = await fetch(`/sessions/${this.session.id}?venue=name&presentation=name`);
+                        this.session = await res.json();
+                    },
+                    
+                    async fetchSessionAttendees(id) {
+                        const res = await fetch(`/sessions/${this.session.id}/attendees`);
+                        this.sessionAttendees = await res.json();
+                    },
+
+                    async fetchAttendees() {
+                        const res = await fetch('/attendees');
+                        this.attendees = await res.json();
+                    },
+
+                    async createAttendeeSession() {
+                        if (this.newAttendeeSession.id) {
+                            const res = await fetch(`/sessions/${this.session.id}/attendees/${this.newAttendeeSession.id}`, {
+                            method: 'PUT',
+                            });
+
+                            this.sessionAttendees.push(
+                                this.attendees.find(it => it.id == this.newAttendeeSession.id)
+                            )
+                        }
+                    },
+
+                    async deleteAttendeeSession(id) {
+                        await fetch(`/sessions/${this.session.id}/attendees/${id}`, { method: 'DELETE' });
+                        this.sessionAttendees = this.sessionAttendees.filter(i => i.id !== id);
+                    },
+
+                    fromEpochMinute(epoch) {
+                        const date = new Date()
+                        date.setTime((epoch + date.getTimezoneOffset()) * 60000) // JS Date wants ms
+                        const year = date.getFullYear()
+                        const month = String(date.getMonth() + 1).padStart(2, "0")
+                        const day = String(date.getDate()).padStart(2, "0")
+                        const hour = String(date.getHours()).padStart(2, "0")
+                        const minute = String(date.getMinutes()).padStart(2, "0")
+                        return `${year}-${month}-${day} ${hour}:${minute}`;
+                    }, 
+
+                    init() {
+                        this.session.id = window.location.search.substring(1)
+                        this.fetchSession()
+                        this.fetchSessionAttendees();
+                        this.fetchAttendees()
+                    }   
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div x-data="session()">
+            <h2 x-text="session.presentation.name + ' - ' + session.venue.name + ' - ' + fromEpochMinute(session.start_time_min) + ' - ' + session.duration_mins"></h2>
+            <table width="80%">
+                <tr>
+                    <th width="70%">Name</th>
+                </tr>
+                <template x-for="sessionAttendee in sessionAttendees" :key="sessionAttendee.id">
+                    <tr>
+                        <td><input type="text" x-model="sessionAttendee.name" readonly></td>
+                        <td><button @click="deleteAttendeeSession(sessionAttendee.id)">Delete</button></td>
+                    </tr>
+                </template>
+                <tr>
+                    <td colspan="4">
+                      <select x-ref="attendeeSelect" x-model.number="newAttendeeSession.id" @change="selectedAttendeeId = $refs.attendeeSelect.options[$refs.attendeeSelect.selectedIndex].value">
+                        <option value="0"></option>
+                        <template x-for="attendee in attendees" :key="attendee.id">
+                          <option :value="attendee.id" x-text="attendee.name"></option>
+                        </template>
+                      </select>
+                    </td>
+                    <td><button @click="createAttendeeSession()">Add</button></td>
+                </tr>    
+            </table>
+        </div>
+    </body>
+</html>
