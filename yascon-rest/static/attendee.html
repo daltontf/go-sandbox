@@ -11,36 +11,35 @@
                     attendeeSessions: [],
                     newAttendeeSession: { },
 
-                    async fetchAttendee() {
-                        const res = await fetch(`/attendees/${this.attendee.id}`);
-                        this.attendee = await res.json();
-                    },
-                    
-                    async fetchAttendeeSessions(id) {
-                        const res = await fetch(`/attendees/${this.attendee.id}/sessions`);
-                        this.attendeeSessions = await res.json();
-                    },
+                    async fetchData() {
+                        const attendeeData = await fetch(`/attendees/${this.attendee.id}`);                       
+                        const attendeeSessionsData = await fetch(`/attendees/${this.attendee.id}/sessions`);
+                        const sessionsData = await fetch('/sessions?venue=name&presentation=name');
+                        
+                        const allSessions = await sessionsData.json();
 
-                    async fetchSessions() {
-                        const res = await fetch('/sessions?venue=name&presentation=name');
-                        this.sessions = await res.json();
+                        this.attendeeSessions = await attendeeSessionsData.json();
+
+                        const sessionSet = new Set(this.attendeeSessions.map(it => it.id));
+
+                        this.sessions = allSessions.filter(session => !sessionSet.has(session.id));
+
+                        this.attendee = await attendeeData.json();
                     },
 
                     async createAttendeeSession() {
                         if (this.newAttendeeSession.id) {
                             const res = await fetch(`/attendees/${this.attendee.id}/sessions/${this.newAttendeeSession.id}`, {
-                            method: 'PUT',
+                                method: 'PUT',
                             });
 
-                            this.attendeeSessions.push(
-                                this.sessions.find(it => it.id == this.newAttendeeSession.id)
-                            )
+                            document.location.reload()
                         }
                     },
 
                     async deleteAttendeeSession(id) {
                         await fetch(`/attendees/${this.attendee.id}/sessions/${id}`, { method: 'DELETE' });
-                        this.attendeeSessions = this.attendeeSessions.filter(i => i.id !== id);
+                        document.location.reload()
                     },
 
                     fromEpochMinute(epoch) {
@@ -53,12 +52,14 @@
                         const minute = String(date.getMinutes()).padStart(2, "0")
                         return `${year}-${month}-${day} ${hour}:${minute}`;
                     },  
+                    
+                    showSessionAttendees(id) {
+                        window.location.href=`./session.html?${id}`     
+                    },
 
                     init() {
                         this.attendee.id = window.location.search.substring(1)
-                        this.fetchAttendee()
-                        this.fetchAttendeeSessions();
-                        this.fetchSessions()
+                        this.fetchData()
                     }   
                 }
             }
@@ -81,6 +82,7 @@
                         <td><input type="text" :value="fromEpochMinute(attendeeSession.start_time_min)" readonly></td> 
                         <td><input type="text" x-model="attendeeSession.duration_mins" readonly></td>      
                         <td><button @click="deleteAttendeeSession(attendeeSession.id)">Delete</button></td>
+                        <td><button @click="showSessionAttendees(attendeeSession.id)">Session</button></td>   
                     </tr>
                 </template>
                 <tr>

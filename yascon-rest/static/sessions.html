@@ -45,17 +45,7 @@
                             body: JSON.stringify(this.newSession)
                         });
 
-                        this.sessions.push({
-                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
-                            "start_time_min": this.newSession.start_time_min,
-                            "duration_mins": this.newSession.duration_mins,
-                            "presentation": {
-                                "name": this.selectedPresentationName
-                            },
-                            "venue": {
-                                "name": this.selectedVenueName
-                            } 
-                        });
+                        document.location.reload()
                     },
 
                     async updateSession(session) {
@@ -106,22 +96,35 @@
             <h2>Sessions</h2>
             <table width="80%">
                 <tr>
-                    <th width="70%">Presentation Name</th>
-                    <th width="15%">Venue Name</th>
                     <th width="15%">Start Date/Time</th>
+                    <th width="70%">Presentation Name</th>
+                    <th width="15%">Venue Name</th>                   
                     <th width="3%">Duration Minutes</th>
                 </tr>
                 <template x-for="session in sessions" :key="session.id">
                     <tr>
-                        <td><input type="text" x-model="session.presentation.name" readonly></td>   
-                        <td><input type="text" x-model="session.venue.name" readonly></td>    
                         <td><input type="text" :value="fromEpochMinute(session.start_time_min)" readonly></td>
+                        <td><input type="text" x-model="session.presentation.name" readonly></td>   
+                        <td><input type="text" x-model="session.venue.name" readonly></td>                        
                         <td><input type="text" x-model="session.duration_mins" readonly></td>
                         <td><button @click="sessionAttendees(session.id)">Attendees</button></td>   
                         <td><button @click="deleteSession(session.id)">Delete</button></td>
                     </tr>
                 </template>
                 <tr>
+                    <td><div
+                        x-init="
+                          flatpickrInstance = flatpickr($refs.dateInput, {
+                            dateFormat: 'Y-m-d H:i',
+                            enableTime: true,
+                            onChange: (selectedDates, dateStr, _) => {
+                              currentDate = dateStr;
+                            }
+                            
+                          })"                        
+                      >
+                      <input x-ref="dateInput" type="text" placeholder="YYYY-MM-DD HH:mm" class="w-full" />                      
+                    </div></td>
                     <td>
                         <select x-ref="presentationSelect" x-model.number="newSession.presentations_id" @change="selectedPresentationName = $refs.presentationSelect.options[$refs.presentationSelect.selectedIndex].text">
                             <option value="0"></option>
@@ -138,19 +141,6 @@
                             </template>
                           </select>
                     </td>
-                    <td><div
-                        x-init="
-                          flatpickrInstance = flatpickr($refs.dateInput, {
-                            dateFormat: 'Y-m-d H:i',
-                            enableTime: true,
-                            onChange: (selectedDates, dateStr, _) => {
-                              currentDate = dateStr;
-                            }
-                            
-                          })"                        
-                      >
-                      <input x-ref="dateInput" type="text" placeholder="YYYY-MM-DD HH:mm" class="w-full" />                      
-                    </div></td>
                     <td><input type="text" x-model.number="newSession.duration_mins"></td>  
                     <td><button @click="createSession()">Add</button></td>
                 </tr>    

@@ -20,13 +20,7 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(this.newAttendee)
                         });
-                        this.attendees.push({
-                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
-                            "name": this.newAttendee.name,    
-                            "password": this.newAttendee.password
-                        });
-                        this.newAttendee.name = ''
-                        this.newAttendee.password = 'password'
+                        document.location.reload()
                     },
 
                     async updateAttendee(attendee) {

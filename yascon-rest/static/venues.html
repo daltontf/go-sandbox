@@ -21,13 +21,7 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(this.newVenue)
                         });
-                        this.venues.push({
-                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
-                            "name": this.newVenue.name,    
-                            "capacity": parseInt(this.newVenue.capacity)
-                        });
-                        this.newVenue.name = ''
-                        this.newVenue.capacity = 100
+                        document.location.reload()
                     },
 
                     async updateVenue(venue) {

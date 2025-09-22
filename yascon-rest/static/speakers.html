@@ -21,13 +21,7 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(this.newSpeaker)
                         });
-                        this.speakers.push({
-                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
-                            "name": this.newSpeaker.name,    
-                            "bio": this.newSpeaker.bio
-                        });
-                        this.newSpeaker.name = ''
-                        this.newSpeaker.bio = 'bio'
+                        document.location.reload()
                     },
 
                     async updateSpeaker(speaker) {

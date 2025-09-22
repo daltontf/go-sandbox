@@ -10,19 +10,26 @@ import (
 	"gorm.io/gorm"
 )
 
-func getAll[T any](db *gorm.DB) http.HandlerFunc {
+func getAll[T any](db *gorm.DB, ordering *string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
 
-		venues, err := gorm.G[T](db).Find(ctx)
+		var entities []T
+		var err error
 
+		if (ordering != nil) {
+			entities, err =  gorm.G[T](db).Order(*ordering).Find(ctx)
+		} else {
+			entities, err =  gorm.G[T](db).Find(ctx)
+		}		
+		
 		w.Header().Set("Content-Type", "application/json")
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
 
-		json.NewEncoder(w).Encode(venues)
+		json.NewEncoder(w).Encode(entities)
 	}	
 }
 
@@ -38,7 +45,7 @@ func getById[T any](db *gorm.DB) http.HandlerFunc {
 			return
 		}
 		json.NewEncoder(w).Encode(entity)
-		w.WriteHeader(http.StatusOK)
+		//w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -97,8 +104,10 @@ func updateById[T any](db *gorm.DB) http.HandlerFunc {
 	}
 }
 
+func stringPtr(s string) *string { return &s }
+
 func GetVenues(db *gorm.DB) http.HandlerFunc {
-	return getAll[Venue](db)
+	return getAll[Venue](db, stringPtr("venues.name asc"))
 }
 
 func GetVenue(db *gorm.DB) http.HandlerFunc {
@@ -119,7 +128,7 @@ func UpdateVenue(db *gorm.DB) http.HandlerFunc {
 
 
 func GetSpeakers(db *gorm.DB) http.HandlerFunc {
-	return getAll[Speaker](db)
+	return getAll[Speaker](db, stringPtr("speakers.name asc"))
 }
 
 func GetSpeaker(db *gorm.DB) http.HandlerFunc {
@@ -143,7 +152,7 @@ func GetSessions(db *gorm.DB) http.HandlerFunc {
 		presentationFields := r.URL.Query()["presentation"]
 		venueFields := r.URL.Query()["venue"]
 		if len(presentationFields) == 0 || len(venueFields) == 0 {
-			getAll[Presentation](db)(w, r)
+			getAll[Session](db, stringPtr("sessions.start_time_min asc"))(w, r)
 		} else {
 			GetSessionsWithPresentationAndVenue(db)(w, r)
 		}
@@ -155,7 +164,7 @@ func GetSession(db *gorm.DB) http.HandlerFunc {
 		presentationFields := r.URL.Query()["presentation"]
 		venueFields := r.URL.Query()["venue"]
 		if len(presentationFields) == 0 || len(venueFields) == 0 {
-			getAll[Presentation](db)(w, r)
+			getById[Session](db)(w, r)
 		} else {
 			GetSessionWithPresentationAndVenue(db)(w, r)
 		}
@@ -180,8 +189,10 @@ func GetSessionsWithPresentationAndVenue(db *gorm.DB) http.HandlerFunc {
 		// TODO handle more than assumeing presentation and venue 
 		result := db.Model(&Session{}).
 		Select("sessions.*, presentations.id as presentation_id, presentations.name as presentation_name, venues.id as venue_id, venues.name as venue_name").
-		Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
-		Joins("JOIN venues ON sessions.venues_id = venues.id").
+			Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
+			Joins("JOIN venues ON sessions.venues_id = venues.id").
+			Order("sessions.start_time_min asc").
+			Order("presentations.name asc").
     		Scan(&sessionsWithPresentationAndVenue)
 
 		w.Header().Set("Content-Type", "application/json")
@@ -225,6 +236,7 @@ func GetPresentationsWithSpeaker(db *gorm.DB) http.HandlerFunc {
 		result := db.Model(&Presentation{}).
 			Select("presentations.*, speakers.id as speaker_id, speakers.name as speaker_name").
 			Joins("JOIN speakers ON presentations.speakers_id = speakers.id").
+			Order("presentations.name asc").
     		Scan(&presentationsWithSpeaker)
 
 		w.Header().Set("Content-Type", "application/json")
@@ -264,7 +276,7 @@ func GetPresentations(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		speakerFields := r.URL.Query()["speaker"]
 		if len(speakerFields) == 0 {
-			getAll[Presentation](db)(w, r)
+			getAll[Presentation](db, stringPtr("presentations.name asc"))(w, r)
 		} else {
 			GetPresentationsWithSpeaker(db)(w, r)
 		}
@@ -342,6 +354,8 @@ func SessionsForAttendee(db *gorm.DB) http.HandlerFunc {
 			Joins("JOIN attendee_sessions ON attendee_sessions.sessions_id = sessions.id").
 			Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
 			Joins("JOIN venues ON sessions.venues_id = venues.id").
+			Order("sessions.start_time_min asc").
+			Order("presentations.name asc").
 			Where("attendee_sessions.attendees_id = ?", attendeesId).			
     		Scan(&sessionsWithPresentationAndVenue)
 
@@ -381,7 +395,7 @@ func AttendeesForSession(db *gorm.DB) http.HandlerFunc {
 
 
 func GetAttendees(db *gorm.DB) http.HandlerFunc {
-	return getAll[Attendee](db)
+	return getAll[Attendee](db, stringPtr("attendees.name asc"))
 }
 
 func GetAttendee(db *gorm.DB) http.HandlerFunc {

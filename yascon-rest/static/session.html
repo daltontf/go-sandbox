@@ -11,19 +11,21 @@
                     sessionAttendees: [],
                     newAttendeeSession: { },
 
-                    async fetchSession() {
-                        const res = await fetch(`/sessions/${this.session.id}?venue=name&presentation=name`);
-                        this.session = await res.json();
-                    },
-                    
-                    async fetchSessionAttendees(id) {
-                        const res = await fetch(`/sessions/${this.session.id}/attendees`);
-                        this.sessionAttendees = await res.json();
-                    },
+                    async fetchData() {
+                        const sessionData = await fetch(`/sessions/${this.session.id}?venue=name&presentation=name`);
+                        
+                        const sessionAttendeesData = await fetch(`/sessions/${this.session.id}/attendees`);
+                                                
+                        this.sessionAttendees = await sessionAttendeesData.json();
 
-                    async fetchAttendees() {
-                        const res = await fetch('/attendees');
-                        this.attendees = await res.json();
+                        const sessionAttendeesSet = new Set(this.sessionAttendees.map(it => it.id));
+                       
+                        const attendeesData = await fetch('/attendees');
+                        const allAttendees = await attendeesData.json();
+
+                        this.attendees = allAttendees.filter(attendee => !sessionAttendeesSet.has(attendee.id));
+
+                        this.session = await sessionData.json();
                     },
 
                     async createAttendeeSession() {
@@ -32,15 +34,13 @@
                             method: 'PUT',
                             });
 
-                            this.sessionAttendees.push(
-                                this.attendees.find(it => it.id == this.newAttendeeSession.id)
-                            )
+                            document.location.reload()
                         }
                     },
 
                     async deleteAttendeeSession(id) {
                         await fetch(`/sessions/${this.session.id}/attendees/${id}`, { method: 'DELETE' });
-                        this.sessionAttendees = this.sessionAttendees.filter(i => i.id !== id);
+                        document.location.reload()
                     },
 
                     fromEpochMinute(epoch) {
@@ -54,11 +54,13 @@
                         return `${year}-${month}-${day} ${hour}:${minute}`;
                     }, 
 
+                    showAttendeeSessions(id) {
+                        window.location.href=`./attendee.html?${id}`     
+                    },
+
                     init() {
                         this.session.id = window.location.search.substring(1)
-                        this.fetchSession()
-                        this.fetchSessionAttendees();
-                        this.fetchAttendees()
+                        this.fetchData()
                     }   
                 }
             }
@@ -75,6 +77,7 @@
                     <tr>
                         <td><input type="text" x-model="sessionAttendee.name" readonly></td>
                         <td><button @click="deleteAttendeeSession(sessionAttendee.id)">Delete</button></td>
+                        <td><button @click="showAttendeeSessions(sessionAttendee.id)">Attendee Sessions</button></td>   
                     </tr>
                 </template>
                 <tr>

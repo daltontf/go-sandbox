@@ -30,17 +30,7 @@
                             body: JSON.stringify(this.newPresentation)
                         });
 
-                        this.presentations.push({
-                            "id": parseInt(res.headers.get("Location").match(/(\d+)$/)[1]),
-                            "name": this.newPresentation.name,    
-                            "description": this.newPresentation.description,
-                            "speaker": {
-                                "name": this.selectedSpeakerName
-                            } 
-                        });
-                        this.newPresentation.name = ''
-                        this.newPresentation.description = ''
-                        this.newPresentation.speaker.name = ''
+                        document.location.reload()
                     },
 
                     async updatePresentation(presentation) {
