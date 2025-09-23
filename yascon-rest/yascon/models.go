@@ -115,7 +115,19 @@ func CreateTablesIfNotExists(db *gorm.DB) {
 		FOREIGN KEY (sessions_id) REFERENCES Sessions(id),
 		CONSTRAINT Uq_Attendee_Sessions UNIQUE (attendees_id, sessions_id)
 	);`)
-	
+
+	db.Exec(`CREATE VIEW IF NOT EXISTS SESSION_WITH_PRESENTATION_AND_VENUES AS
+		SELECT sessions.*, presentations.id as presentation_id, presentations.name as presentation_name, venues.id as venue_id, venues.name as venue_name
+		FROM sessions
+		JOIN presentations ON sessions.presentations_id = presentations.id
+		JOIN venues ON sessions.venues_id = venues.id`)
+
+	db.Exec(`CREATE VIEW IF NOT EXISTS PRESENTATION_WITH_SPEAKERS AS
+		SELECT presentations.*, speakers.id as speaker_id, speakers.name as speaker_name
+		FROM presentations
+		JOIN speakers ON presentations.speakers_id = speakers.id	
+	`)
+
 	db.Exec(`
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_attendee_name ON Attendees(name);	
 		CREATE INDEX IF NOT EXISTS idx_attendee_session_attendee ON Attendee_Sessions(attendees_id);

@@ -154,7 +154,7 @@ func GetSessions(db *gorm.DB) http.HandlerFunc {
 		if len(presentationFields) == 0 || len(venueFields) == 0 {
 			getAll[Session](db, stringPtr("sessions.start_time_min asc"))(w, r)
 		} else {
-			GetSessionsWithPresentationAndVenue(db)(w, r)
+			getAll[SessionWithPresentationAndVenue](db, stringPtr("start_time_min asc, presentation_name asc"))(w, r)
 		}
 	}
 }
@@ -166,7 +166,7 @@ func GetSession(db *gorm.DB) http.HandlerFunc {
 		if len(presentationFields) == 0 || len(venueFields) == 0 {
 			getById[Session](db)(w, r)
 		} else {
-			GetSessionWithPresentationAndVenue(db)(w, r)
+			getById[SessionWithPresentationAndVenue](db)(w, r)
 		}
 	}
 }
@@ -183,102 +183,13 @@ func UpdateSession(db *gorm.DB) http.HandlerFunc {
 	return updateById[Session](db)
 }
 
-func GetSessionsWithPresentationAndVenue(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		sessionsWithPresentationAndVenue := []SessionWithPresentationAndVenue{}
-		// TODO handle more than assumeing presentation and venue 
-		result := db.Model(&Session{}).
-		Select("sessions.*, presentations.id as presentation_id, presentations.name as presentation_name, venues.id as venue_id, venues.name as venue_name").
-			Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
-			Joins("JOIN venues ON sessions.venues_id = venues.id").
-			Order("sessions.start_time_min asc").
-			Order("presentations.name asc").
-    		Scan(&sessionsWithPresentationAndVenue)
-
-		w.Header().Set("Content-Type", "application/json")
-
-		if result.Error == nil {
-			json.NewEncoder(w).Encode(sessionsWithPresentationAndVenue)
-		} else {
-			http.Error(w, result.Error.Error(), 500)
-		}
-	}
-}
-
-func GetSessionWithPresentationAndVenue(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
-
-		var sessionWithPresentationAndVenue SessionWithPresentationAndVenue
-		// TODO handle more than assumeing presentation and venue 
-		result := db.Model(&Session{}).
-    		Select("sessions.*, presentations.id as presentation_id, presentations.name as presentation_name, venues.id as venue_id, venues.name as venue_name").
-    		Joins("JOIN presentations ON sessions.presentations_id = presentations.id").
-			Joins("JOIN venues ON sessions.venues_id = venues.id").
-			Where("sessions.id = ?", id).
-    		First(&sessionWithPresentationAndVenue)
-
-		w.Header().Set("Content-Type", "application/json")
-
-		if result.Error == nil {
-			json.NewEncoder(w).Encode(sessionWithPresentationAndVenue)
-		} else {
-			http.Error(w, result.Error.Error(), 500)
-		}
-	}
-}
-
-
-func GetPresentationsWithSpeaker(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		presentationsWithSpeaker := []PresentationWithSpeaker{}
-		// TODO handle more than assumeing name 
-		result := db.Model(&Presentation{}).
-			Select("presentations.*, speakers.id as speaker_id, speakers.name as speaker_name").
-			Joins("JOIN speakers ON presentations.speakers_id = speakers.id").
-			Order("presentations.name asc").
-    		Scan(&presentationsWithSpeaker)
-
-		w.Header().Set("Content-Type", "application/json")
-
-		if result.Error == nil {
-			json.NewEncoder(w).Encode(presentationsWithSpeaker)
-		} else {
-			http.Error(w, result.Error.Error(), 500)
-		}
-		
-	}
-}
-
-func GetPresentationWithSpeaker(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
-
-		var presentationWithSpeaker PresentationWithSpeaker
-		// TODO handle more than assumeing name 
-		result := db.Model(&Presentation{}).
-    		Select("presentations.*, speakers.id as speaker_id, speakers.name as speaker_name").
-    		Joins("JOIN speakers ON presentations.speakers_id = speakers.id").
-			Where("presentations.id = ?", id).
-    		First(&presentationWithSpeaker)
-
-		w.Header().Set("Content-Type", "application/json")
-
-		if result.Error == nil {
-			json.NewEncoder(w).Encode(presentationWithSpeaker)
-		} else {
-			http.Error(w, result.Error.Error(), 500)
-		}
-	}
-}
-
 func GetPresentations(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		speakerFields := r.URL.Query()["speaker"]
 		if len(speakerFields) == 0 {
 			getAll[Presentation](db, stringPtr("presentations.name asc"))(w, r)
 		} else {
-			GetPresentationsWithSpeaker(db)(w, r)
+			getAll[PresentationWithSpeaker](db, stringPtr("name asc"))(w, r)
 		}
 	}
 }
@@ -289,7 +200,7 @@ func GetPresentation(db *gorm.DB) http.HandlerFunc {
 		if len(speakerFields) == 0 {
 			getById[Presentation](db)(w, r)
 		} else {
-			GetPresentationWithSpeaker(db)(w, r)
+			getById[PresentationWithSpeaker](db)(w, r)
 		}
 	} 
 }
