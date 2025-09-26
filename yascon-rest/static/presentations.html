@@ -1,90 +1,96 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="./content.css"/>
-        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-        <script>
-            function presentations() {
+
+<head>
+    <link rel="stylesheet" href="./content.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <h2>Presentations</h2>
+        <table width="80%">
+            <tr>
+                <th width="30%">Name</th>
+                <th width="55%">Description</th>
+                <th width="15%">Speaker Name</th>
+            </tr>
+            <tr v-for="presentation in presentations" :key="presentation.id">
+                <td><input type="text" v-model="presentation.name" @blur="updatePresentation(presentation)"></td>
+                <td><input type="text" v-model="presentation.description" @blur="updatePresentation(presentation)"></td>
+                <td><input type="text" v-model="presentation.speaker.name" readonly></td>
+                <td><button @click="deletePresentation(presentation.id)">Delete</button></td>
+            </tr>
+            <tr>
+                <td><input type="text" placeholder="Presentation Name" v-model="newPresentation.name"></td>
+                <td><input type="text" placeholder="Description" v-model="newPresentation.description"></td>
+                <td>
+                    <select v-model="newPresentation.speakers_id">
+                        <option value="0"></option>
+                        <option v-for="speaker in speakers" :key="speaker.id" :value="speaker.id">
+                            {{ speaker.name }}
+                        </option>
+                        </template>
+                    </select>
+                </td>
+                <td><button @click="createPresentation()">Add</button></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
                 return {
                     presentations: [],
-                    newPresentation: { name: '', speakers_id: -1},
+                    newPresentation: { name: '', speakers_id: -1 },
                     selectedSpeakerName: '',
-                    speakers: [],
-
-                    async fetchPresentations() {
-                        const res = await fetch('/presentations?speaker=name');
-                        this.presentations = await res.json();
-                    },
-
-                    async fetchSpeakers() {
-                        const res = await fetch('/speakers');
-                        this.speakers = await res.json();
-                    },
-
-                    async createPresentation() {
-                        if (!this.newPresentation.name) presentations;
-
-                        const res = await fetch('/presentations', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.newPresentation)
-                        });
-
-                        document.location.reload()
-                    },
-
-                    async updatePresentation(presentation) {
-                        await fetch(`/presentations/${presentation.id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(presentation)
-                        });
-                    },
-
-                    async deletePresentation(id) {
-                        await fetch(`/presentations/${id}`, { method: 'DELETE' });
-                        this.presentations = this.presentations.filter(i => i.id !== id);
-                    },
-
-                    init() {
-                        this.fetchPresentations();
-                        this.fetchSpeakers();
-                    }   
+                    speakers: []
                 }
+            },
+            methods: {
+                async fetchPresentations() {
+                    const res = await fetch('/presentations?speaker=name');
+                    this.presentations = await res.json();
+                },
+
+                async fetchSpeakers() {
+                    const res = await fetch('/speakers');
+                    this.speakers = await res.json();
+                },
+
+                async createPresentation() {
+                    if (!this.newPresentation.name) presentations;
+
+                    const res = await fetch('/presentations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newPresentation)
+                    });
+
+                    document.location.reload()
+                },
+
+                async updatePresentation(presentation) {
+                    await fetch(`/presentations/${presentation.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(presentation)
+                    });
+                },
+
+                async deletePresentation(id) {
+                    await fetch(`/presentations/${id}`, { method: 'DELETE' });
+                    document.location.reload()
+                }
+            },
+            async mounted() {
+                this.fetchPresentations();
+                this.fetchSpeakers();
             }
-        </script>
-    </head>
-    <body>
-        <div x-data="presentations()">
-            <h2>Presentations</h2>
-            <table width="80%">
-                <tr>
-                    <th width="30%">Name</th>
-                    <th width="55%">Description</th>
-                    <th width="15%">Speaker Name</th>
-                </tr>
-                <template x-for="presentation in presentations" :key="presentation.id">
-                    <tr>
-                        <td><input type="text" x-model="presentation.name" @blur="updatePresentation(presentation)"></td>
-                        <td><input type="text" x-model="presentation.description" @blur="updatePresentation(presentation)"></td>  
-                        <td><input type="text" x-model="presentation.speaker.name" readonly></td>    
-                        <td><button @click="deletePresentation(presentation.id)">Delete</button></td>
-                    </tr>
-                </template>
-                <tr>
-                    <td><input type="text" placeholder="Presentation name" x-model="newPresentation.name"></td>
-                    <td><input type="text" placeholder="description" x-model="newPresentation.description"></td>
-                    <td>
-                        <select x-ref="speakerSelect" x-model.number="newPresentation.speakers_id" @change="selectedSpeakerName = $refs.speakerSelect.options[$refs.speakerSelect.selectedIndex].text">
-                            <option value="0"></option>
-                            <template x-for="speaker in speakers" :key="speaker.id">
-                              <option :value="speaker.id" x-text="speaker.name"></option>
-                            </template>
-                          </select>
-                    </td>
-                    <td><button @click="createPresentation()">Add</button></td>
-                </tr>    
-            </table>
-        </div>
-    </body>
+        }).mount("#app");
+    </script>
+</body>
+
 </html>

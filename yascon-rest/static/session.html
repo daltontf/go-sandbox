@@ -1,97 +1,99 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="./content.css"/>
-        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-        <script>
-            function session() {
+<head>
+    <link rel="stylesheet" href="./content.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h2>
+            {{ session.presentation.name + ' - ' + session.venue.name + ' - ' + fromEpochMinute(session.start_time_min) + ' - ' + session.duration_mins}}
+        </h2>
+        <table width="80%">
+            <tr>
+                <th width="70%">Name</th>
+            </tr>
+            <tr v-for="sessionAttendee in sessionAttendees" :key="sessionAttendee.id">
+                <td><input type="text" v-model="sessionAttendee.name" readonly></td>
+                <td><button @click="deleteAttendeeSession(sessionAttendee.id)">Delete</button></td>
+                <td><button @click="showAttendeeSessions(sessionAttendee.id)">Attendee Sessions</button></td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <select v-model="newAttendeeSession.id">
+                        <option value="0"></option>
+                        <option v-for="attendee in attendees" :key="attendee.id" :value="attendee.id">
+                            {{ attendee.name }}
+                        </option>
+                    </select>
+                </td>
+                <td><button @click="createAttendeeSession()">Add</button></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
                 return {
-                    session: { presentation: { name: ''} , venue: { name: ""}},
+                    session: { presentation: { name: '' }, venue: { name: "" } },
                     attendees: [],
                     sessionAttendees: [],
-                    newAttendeeSession: { },
-
-                    async fetchData() {
-                        const sessionData = await fetch(`/sessions/${this.session.id}?venue=name&presentation=name`);
-                        
-                        const sessionAttendeesData = await fetch(`/sessions/${this.session.id}/attendees`);
-                                                
-                        this.sessionAttendees = await sessionAttendeesData.json();
-
-                        const sessionAttendeesSet = new Set(this.sessionAttendees.map(it => it.id));
-                       
-                        const attendeesData = await fetch('/attendees');
-                        const allAttendees = await attendeesData.json();
-
-                        this.attendees = allAttendees.filter(attendee => !sessionAttendeesSet.has(attendee.id));
-
-                        this.session = await sessionData.json();
-                    },
-
-                    async createAttendeeSession() {
-                        if (this.newAttendeeSession.id) {
-                            const res = await fetch(`/sessions/${this.session.id}/attendees/${this.newAttendeeSession.id}`, {
-                            method: 'PUT',
-                            });
-
-                            document.location.reload()
-                        }
-                    },
-
-                    async deleteAttendeeSession(id) {
-                        await fetch(`/sessions/${this.session.id}/attendees/${id}`, { method: 'DELETE' });
-                        document.location.reload()
-                    },
-
-                    fromEpochMinute(epoch) {
-                        const date = new Date()
-                        date.setTime((epoch + date.getTimezoneOffset()) * 60000) // JS Date wants ms
-                        const year = date.getFullYear()
-                        const month = String(date.getMonth() + 1).padStart(2, "0")
-                        const day = String(date.getDate()).padStart(2, "0")
-                        const hour = String(date.getHours()).padStart(2, "0")
-                        const minute = String(date.getMinutes()).padStart(2, "0")
-                        return `${year}-${month}-${day} ${hour}:${minute}`;
-                    }, 
-
-                    showAttendeeSessions(id) {
-                        window.location.href=`./attendee.html?${id}`     
-                    },
-
-                    init() {
-                        this.session.id = window.location.search.substring(1)
-                        this.fetchData()
-                    }   
+                    newAttendeeSession: {}
                 }
-            }
-        </script>
-    </head>
-    <body>
-        <div x-data="session()">
-            <h2 x-text="session.presentation.name + ' - ' + session.venue.name + ' - ' + fromEpochMinute(session.start_time_min) + ' - ' + session.duration_mins"></h2>
-            <table width="80%">
-                <tr>
-                    <th width="70%">Name</th>
-                </tr>
-                <template x-for="sessionAttendee in sessionAttendees" :key="sessionAttendee.id">
-                    <tr>
-                        <td><input type="text" x-model="sessionAttendee.name" readonly></td>
-                        <td><button @click="deleteAttendeeSession(sessionAttendee.id)">Delete</button></td>
-                        <td><button @click="showAttendeeSessions(sessionAttendee.id)">Attendee Sessions</button></td>   
-                    </tr>
-                </template>
-                <tr>
-                    <td colspan="4">
-                      <select x-ref="attendeeSelect" x-model.number="newAttendeeSession.id" @change="selectedAttendeeId = $refs.attendeeSelect.options[$refs.attendeeSelect.selectedIndex].value">
-                        <option value="0"></option>
-                        <template x-for="attendee in attendees" :key="attendee.id">
-                          <option :value="attendee.id" x-text="attendee.name"></option>
-                        </template>
-                      </select>
-                    </td>
-                    <td><button @click="createAttendeeSession()">Add</button></td>
-                </tr>    
-            </table>
-        </div>
-    </body>
+            },
+            methods: {
+                async createAttendeeSession() {
+                    if (this.newAttendeeSession.id) {
+                        const res = await fetch(`/sessions/${this.session.id}/attendees/${this.newAttendeeSession.id}`, {
+                            method: 'PUT',
+                        });
+
+                        document.location.reload()
+                    }
+                },
+
+                async deleteAttendeeSession(id) {
+                    await fetch(`/sessions/${this.session.id}/attendees/${id}`, { method: 'DELETE' });
+                    document.location.reload()
+                },
+
+                fromEpochMinute(epoch) {
+                    const date = new Date()
+                    date.setTime((epoch + date.getTimezoneOffset()) * 60000) // JS Date wants ms
+                    const year = date.getFullYear()
+                    const month = String(date.getMonth() + 1).padStart(2, "0")
+                    const day = String(date.getDate()).padStart(2, "0")
+                    const hour = String(date.getHours()).padStart(2, "0")
+                    const minute = String(date.getMinutes()).padStart(2, "0")
+                    return `${year}-${month}-${day} ${hour}:${minute}`;
+                },
+
+                showAttendeeSessions(id) {
+                    window.location.href = `./attendee.html?${id}`
+                },
+            },
+            async mounted() {
+                this.session.id = window.location.search.substring(1)
+
+                const sessionData = await fetch(`/sessions/${this.session.id}?venue=name&presentation=name`);
+
+                const sessionAttendeesData = await fetch(`/sessions/${this.session.id}/attendees`);
+
+                this.sessionAttendees = await sessionAttendeesData.json();
+
+                const sessionAttendeesSet = new Set(this.sessionAttendees.map(it => it.id));
+
+                const attendeesData = await fetch('/attendees');
+                const allAttendees = await attendeesData.json();
+
+                this.attendees = allAttendees.filter(attendee => !sessionAttendeesSet.has(attendee.id));
+
+                this.session = await sessionData.json();
+            },
+        }).mount("#app");
+    </script>
+</body>
+
 </html>

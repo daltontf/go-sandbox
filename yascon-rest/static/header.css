@@ -1,3 +1,21 @@
 body, html {width: 100%; height: 100%; margin: 0; padding: 0}
 .flex-top {display: flex; width: 100%; height: 100%; flex-direction: column; overflow: hidden;}
 .iframe-flex { flex-grow: 1; border: none; margin: 0; padding: 0; }
+
+body {
+    background-color: #111;
+    color: #DFD;
+}
+
+a {
+    color: inherit;
+    
+}
+
+table {
+    text-align: center;
+}
+
+table {
+    background-color: purple;
+}

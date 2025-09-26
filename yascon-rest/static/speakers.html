@@ -1,70 +1,77 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="./content.css"/>
-        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-        <script>
-            function speakers() {
-                return {
-                    speakers: [],
-                    newSpeaker: { name: '' },
 
-                    async fetchSpeakers() {
-                        const res = await fetch('/speakers');
-                        this.speakers = await res.json();
-                    },
+<head>
+    <link rel="stylesheet" href="./content.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
-                    async createSpeaker() {
-                        if (!this.newSpeaker.name) speakers;
-                        const res = await fetch('/speakers', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.newSpeaker)
-                        });
-                        document.location.reload()
-                    },
+</head>
 
-                    async updateSpeaker(speaker) {
-                        await fetch(`/speakers/${speaker.id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(speaker)
-                        });
-                    },
+<body>
+    <div id="app">
+        <h2>Speakers</h2>
+        <table width="80%">
+            <tr>
+                <th width="20%">Name</th>
+                <th width="80%">Bio</th>
+            </tr>
+            <tr v-for="speaker in speakers" :key="speaker.id">
+                <td><input type="text" v-model="speaker.name" @blur="updateSpeaker(speaker)"></td>
+                <td><input type="text" v-model="speaker.bio" @blur="updateSpeaker(speaker)"></td>
+                <td><button @click="deleteSpeaker(speaker.id)">Delete</button></td>
+            </tr>
+            <tr>
+                <td><input type="text" placeholder="Speaker name" v-model="newSpeaker.name"></td>
+                <td><input type="text" placeholder="bio" v-model.number="newSpeaker.bio"></td>
+                <td><button @click="createSpeaker()">Add</button></td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script>
+    const { createApp } = Vue;
 
-                    async deleteSpeaker(id) {
-                        await fetch(`/speakers/${id}`, { method: 'DELETE' });
-                        this.speakers = this.speakers.filter(i => i.id !== id);
-                    },
-
-                    init() {
-                        this.fetchSpeakers();
-                    }   
-                }
+    createApp({
+        data() {
+            return {
+                speakers: [],
+                newSpeaker: { name: '' }
             }
-        </script>
-    </head>
-    <body>
-        <div x-data="speakers()">
-            <h2>Speakers</h2>
-            <table width="80%">
-                <tr>
-                    <th width="20%">Name</th>
-                    <th width="80%">Bio</th>
-                </tr>
-                <template x-for="speaker in speakers" :key="speaker.id">
-                    <tr>
-                        <td><input type="text" x-model="speaker.name" @blur="updateSpeaker(speaker)"></td>
-                        <td><input type="text" x-model="speaker.bio" @blur="updateSpeaker(speaker)"></td>    
-                        <td><button @click="deleteSpeaker(speaker.id)">Delete</button></td>
-                    </tr>
-                </template>
-                <tr>
-                    <td><input type="text" placeholder="Speaker name" x-model="newSpeaker.name"></td>
-                    <td><input type="text" placeholder="bio" x-model.number="newSpeaker.bio"></td>
-                    <td><button @click="createSpeaker()">Add</button></td>
-                </tr>    
-            </table>
-        </div>
-    </body>
+        },
+        methods: {
+            async fetchSpeakers() {
+                const res = await fetch('/speakers');
+                this.speakers = await res.json();
+            },
+
+            async createSpeaker() {
+                if (!this.newSpeaker.name) speakers;
+                const res = await fetch('/speakers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.newSpeaker)
+                });
+                document.location.reload()
+            },
+
+            async updateSpeaker(speaker) {
+                await fetch(`/speakers/${speaker.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(speaker)
+                });
+            },
+
+            async deleteSpeaker(id) {
+                await fetch(`/speakers/${id}`, { method: 'DELETE' });
+                this.speakers = this.speakers.filter(i => i.id !== id);
+            }
+        },
+
+        async mounted() {
+            this.fetchSpeakers();
+        }
+    }).mount("#app");
+</script>
+
 </html>

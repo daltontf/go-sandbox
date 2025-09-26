@@ -1,70 +1,77 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="./content.css"/>
-        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-        <script>
-            function venues() {
+
+<head>
+    <link rel="stylesheet" href="./content.css" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <h2>Venues</h2>
+        <table width="80%">
+            <tr>
+                <th width="34%">Name</th>
+                <th width="6%">Capacity</th>
+            </tr>
+            <tr v-for="venue in venues" :key="venue.id">
+                <td><input type="text" v-model="venue.name" @blur="updateVenue(venue)"></td>
+                <td><input type="text" v-model.number="venue.capacity" @blur="updateVenue(venue)"></td>
+                <td><button @click="deleteVenue(venue.id)">Delete</button></td>
+            </tr>
+            <tr>
+                <td><input type="text" placeholder="Venue Name" v-model="newVenue.name"></td>
+                <td><input type="text" placeholder="100" v-model.number="newVenue.capacity"></td>
+                <td><button @click="createVenue()">Add</button></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
                 return {
                     venues: [],
-                    newVenue: { name: '' },
-
-                    async fetchVenues() {
-                        const res = await fetch('/venues');
-                        this.venues = await res.json();
-                    },
-
-                    async createVenue() {
-                        if (!this.newVenue.name) venues;
-                        const res = await fetch('/venues', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.newVenue)
-                        });
-                        document.location.reload()
-                    },
-
-                    async updateVenue(venue) {
-                        await fetch(`/venues/${venue.id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(venue)
-                        });
-                    },
-
-                    async deleteVenue(id) {
-                        await fetch(`/venues/${id}`, { method: 'DELETE' });
-                        this.venues = this.venues.filter(i => i.id !== id);
-                    },
-
-                    init() {
-                        this.fetchVenues();
-                    }   
+                    newVenue: { name: '' }
                 }
+            },
+            methods: {
+
+                async fetchVenues() {
+                    const res = await fetch('/venues');
+                    this.venues = await res.json();
+                },
+
+                async createVenue() {
+                    if (!this.newVenue.name) venues;
+                    const res = await fetch('/venues', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.newVenue)
+                    });
+                    document.location.reload()
+                },
+
+                async updateVenue(venue) {
+                    await fetch(`/venues/${venue.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(venue)
+                    });
+                },
+
+                async deleteVenue(id) {
+                    await fetch(`/venues/${id}`, { method: 'DELETE' });
+                    this.venues = this.venues.filter(i => i.id !== id);
+                }
+            },
+
+            async mounted() {
+                this.fetchVenues();
             }
-        </script>
-    </head>
-    <body>
-        <div x-data="venues()">
-            <h2>Venues</h2>
-            <table width="80%">
-                <tr>
-                    <th width="34%">Name</th>
-                    <th width="6%">Capacity</th>
-                </tr>
-                <template x-for="venue in venues" :key="venue.id">
-                    <tr>
-                        <td><input type="text" x-model="venue.name" @blur="updateVenue(venue)"></td>
-                        <td><input type="text" x-model.number="venue.capacity" @blur="updateVenue(venue)"></td>    
-                        <td><button @click="deleteVenue(venue.id)">Delete</button></td>
-                    </tr>
-                </template>
-                <tr>
-                    <td><input type="text" placeholder="Venue name" x-model="newVenue.name"></td>
-                    <td><input type="text" placeholder="100" x-model.number="newVenue.capacity"></td>
-                    <td><button @click="createVenue()">Add</button></td>
-                </tr>    
-            </table>
-        </div>
-    </body>
+        }).mount("#app");
+    </script>
+</body>
+
 </html>

@@ -1,74 +1,90 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-        <script>
-            function attendees() {
-                return {
-                    attendees: [],
-                    newAttendee: { name: '' },
 
-                    async fetchAttendees() {
-                        const res = await fetch('/attendees');
-                        this.attendees = await res.json();
-                    },
+<head>
+  <meta charset="UTF-8">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
 
-                    async createAttendee() {
-                        if (!this.newAttendee.name) attendees;
-                        const res = await fetch('/attendees', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.newAttendee)
-                        });
-                        document.location.reload()
-                    },
+<body>
 
-                    async updateAttendee(attendee) {
-                        await fetch(`/attendees/${attendee.id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(attendee)
-                        });
-                    },
+  <div id="app">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Password</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="attendee in attendees" :key="attendee.id">
+          <td><input type="text" v-model="attendee.name" @blur="updateAttendee(attendee)"></td>
+          <td><input type="password" v-model="attendee.password" @blur="updateAttendee(attendee)"></td>
+          <td><button @click="attendeeSessions(attendee.id)">Sessions</button></td>
+          <td><button @click="deleteAttendee(attendee.id)">Delete</button></td>
+        </tr>
+        <tr>
+          <td><input type="text" placeholder="Attendee Name" v-model="newAttendee.name"></td>
+          <td><input type="text" placeholder="Password" v-model="newAttendee.password"></td>
+          <td><button @click="createAttendee()">Add</button></td>
+        </tr> 
+      </tbody>
+    </table>
 
-                    async deleteAttendee(id) {
-                        await fetch(`/attendees/${id}`, { method: 'DELETE' });
-                        this.attendees = this.attendees.filter(i => i.id !== id);
-                    },
+    <div v-if="error" style="color:red;">Error: {{ error }}</div>
+  </div>
 
-                    attendeeSessions(id) {
-                        window.location.href=`./attendee.html?${id}`     
-                    },
+  <script>
+    const { createApp } = Vue;
 
-                    init() {
-                        this.fetchAttendees();
-                    }   
-                }
-            }
-        </script>
-    </head>
-    <body>
-        <div x-data="attendees()">
-            <h2>Attendees</h2>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>Password</th>
-                </tr>
-                <template x-for="attendee in attendees" :key="attendee.id">
-                    <tr>
-                        <td><input type="text" x-model="attendee.name" @blur="updateAttendee(attendee)"></td>
-                        <td><input type="password" x-model="attendee.password" @blur="updateAttendee(attendee)"></td>  
-                        <td><button @click="attendeeSessions(attendee.id)">Sessions</button></td>  
-                        <td><button @click="deleteAttendee(attendee.id)">Delete</button></td>
-                    </tr>
-                </template>
-                <tr>
-                    <td><input type="text" placeholder="Attendee name" x-model="newAttendee.name"></td>
-                    <td><input type="text" placeholder="password" x-model.number="newAttendee.password"></td>
-                    <td><button @click="createAttendee()">Add</button></td>
-                </tr>    
-            </table>
-        </div>
-    </body>
+    createApp({
+      data() {
+        return {
+          attendees: [],
+          newAttendee: { name: '' },
+          error: null
+        };
+      },
+      methods: {
+        async createAttendee() {
+          if (!this.newAttendee.name) attendees;
+          const res = await fetch('/attendees', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(this.newAttendee)
+          });
+          document.location.reload()
+        },
+
+        async updateAttendee(attendee) {
+          await fetch(`/attendees/${attendee.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(attendee)
+          });
+        },
+
+        async deleteAttendee(id) {
+          await fetch(`/attendees/${id}`, { method: 'DELETE' });
+          document.location.reload()
+        },
+
+        attendeeSessions(id) {
+          window.location.href = `./attendee.html?${id}`
+        },
+
+      },
+      async mounted() {
+        try {
+          const res = await fetch('/attendees');
+          this.attendees = await res.json();
+        } catch (err) {
+          this.error = err.message;
+        }
+      }
+    }).mount("#app");
+  </script>
+
+</body>
+
 </html>

@@ -8,6 +8,8 @@ import (
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"os"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
+	_ "github.com/swaggo/http-swagger/example/go-chi/docs"
 )
 
 func main() {
@@ -63,6 +65,10 @@ func main() {
 	fileServer := http.FileServer(http.Dir("./static"))
 
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
+
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
+	))
 
 	log.Println("Server running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
