@@ -69,17 +69,17 @@
             methods: {
                 
                 async fetchSessions() {
-                    const res = await fetch('/sessions?venue=name&presentation=name');
+                    const res = await fetch('/api/sessions?venue=name&presentation=name');
                     this.sessions = await res.json();
                 },
 
                 async fetchPresentations() {
-                    const res = await fetch('/presentations');
+                    const res = await fetch('/api/presentations');
                     this.presentations = await res.json();
                 },
 
                 async fetchVenues() {
-                    const res = await fetch('/venues');
+                    const res = await fetch('/api/venues');
                     this.venues = await res.json();
                 },
 
@@ -88,7 +88,7 @@
 
                     this.newSession.start_time_min = this.toEpochMinute(flatpickrInstance.selectedDates[0])
 
-                    const res = await fetch('/sessions', {
+                    const res = await fetch('/api/sessions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(this.newSession)
@@ -97,7 +97,7 @@
                 },
 
                 async updateSession(session) {
-                    await fetch(`/sessions/${session.id}`, {
+                    await fetch(`/api/sessions/${session.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(session)
@@ -105,7 +105,7 @@
                 },
 
                 async deleteSession(id) {
-                    await fetch(`/sessions/${id}`, { method: 'DELETE' });
+                    await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
                     document.location.reload()
                 },
 

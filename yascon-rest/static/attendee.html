@@ -52,9 +52,9 @@
             async mounted() {
                 this.attendee.id = window.location.search.substring(1)
 
-                const attendeeData = await fetch(`/attendees/${this.attendee.id}`);
-                const attendeeSessionsData = await fetch(`/attendees/${this.attendee.id}/sessions`);
-                const sessionsData = await fetch('/sessions?venue=name&presentation=name');
+                const attendeeData = await fetch(`/api/attendees/${this.attendee.id}`);
+                const attendeeSessionsData = await fetch(`/api/attendees/${this.attendee.id}/sessions`);
+                const sessionsData = await fetch('/api/sessions?venue=name&presentation=name');
 
                 const allSessions = await sessionsData.json();
 
@@ -69,7 +69,7 @@
             methods: {
                 async createAttendeeSession() {
                     if (this.newAttendeeSession.id) {
-                        const res = await fetch(`/attendees/${this.attendee.id}/sessions/${this.newAttendeeSession.id}`, {
+                        const res = await fetch(`/api/attendees/${this.attendee.id}/sessions/${this.newAttendeeSession.id}`, {
                             method: 'PUT',
                         });
 
@@ -78,7 +78,7 @@
                 },
 
                 async deleteAttendeeSession(id) {
-                    await fetch(`/attendees/${this.attendee.id}/sessions/${id}`, { method: 'DELETE' });
+                    await fetch(`/api/attendees/${this.attendee.id}/sessions/${id}`, { method: 'DELETE' });
                     document.location.reload()
                 },
 

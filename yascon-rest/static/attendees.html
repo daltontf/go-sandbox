@@ -48,7 +48,7 @@
       methods: {
         async createAttendee() {
           if (!this.newAttendee.name) attendees;
-          const res = await fetch('/attendees', {
+          const res = await fetch('/api/attendees', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(this.newAttendee)
@@ -65,7 +65,7 @@
         },
 
         async deleteAttendee(id) {
-          await fetch(`/attendees/${id}`, { method: 'DELETE' });
+          await fetch(`/api/attendees/${id}`, { method: 'DELETE' });
           document.location.reload()
         },
 
@@ -76,7 +76,7 @@
       },
       async mounted() {
         try {
-          const res = await fetch('/attendees');
+          const res = await fetch('/api/attendees');
           this.attendees = await res.json();
         } catch (err) {
           this.error = err.message;

@@ -80,7 +80,7 @@ func deleteById[T any](db *gorm.DB) http.HandlerFunc {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
@@ -250,7 +250,7 @@ func DeleteAttendeeSession(db *gorm.DB) http.HandlerFunc {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

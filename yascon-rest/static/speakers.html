@@ -40,13 +40,13 @@
         },
         methods: {
             async fetchSpeakers() {
-                const res = await fetch('/speakers');
+                const res = await fetch('/api/speakers');
                 this.speakers = await res.json();
             },
 
             async createSpeaker() {
                 if (!this.newSpeaker.name) speakers;
-                const res = await fetch('/speakers', {
+                const res = await fetch('/api/speakers', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(this.newSpeaker)
@@ -55,7 +55,7 @@
             },
 
             async updateSpeaker(speaker) {
-                await fetch(`/speakers/${speaker.id}`, {
+                await fetch(`/api/speakers/${speaker.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(speaker)
@@ -63,7 +63,7 @@
             },
 
             async deleteSpeaker(id) {
-                await fetch(`/speakers/${id}`, { method: 'DELETE' });
+                await fetch(`/api/speakers/${id}`, { method: 'DELETE' });
                 this.speakers = this.speakers.filter(i => i.id !== id);
             }
         },

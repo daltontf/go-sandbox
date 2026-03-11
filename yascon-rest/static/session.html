@@ -46,7 +46,7 @@
             methods: {
                 async createAttendeeSession() {
                     if (this.newAttendeeSession.id) {
-                        const res = await fetch(`/sessions/${this.session.id}/attendees/${this.newAttendeeSession.id}`, {
+                        const res = await fetch(`/api/sessions/${this.session.id}/attendees/${this.newAttendeeSession.id}`, {
                             method: 'PUT',
                         });
 
@@ -55,7 +55,7 @@
                 },
 
                 async deleteAttendeeSession(id) {
-                    await fetch(`/sessions/${this.session.id}/attendees/${id}`, { method: 'DELETE' });
+                    await fetch(`/api/sessions/${this.session.id}/attendees/${id}`, { method: 'DELETE' });
                     document.location.reload()
                 },
 
@@ -77,15 +77,15 @@
             async mounted() {
                 this.session.id = window.location.search.substring(1)
 
-                const sessionData = await fetch(`/sessions/${this.session.id}?venue=name&presentation=name`);
+                const sessionData = await fetch(`/api/sessions/${this.session.id}?venue=name&presentation=name`);
 
-                const sessionAttendeesData = await fetch(`/sessions/${this.session.id}/attendees`);
+                const sessionAttendeesData = await fetch(`/api/sessions/${this.session.id}/attendees`);
 
                 this.sessionAttendees = await sessionAttendeesData.json();
 
                 const sessionAttendeesSet = new Set(this.sessionAttendees.map(it => it.id));
 
-                const attendeesData = await fetch('/attendees');
+                const attendeesData = await fetch('/api/attendees');
                 const allAttendees = await attendeesData.json();
 
                 this.attendees = allAttendees.filter(attendee => !sessionAttendeesSet.has(attendee.id));

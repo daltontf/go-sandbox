@@ -1,5 +1,5 @@
 ###
-POST http://localhost:8080/attendees
+POST http://localhost:8080/api/attendees
 Content-Type: application/json
 
 {"name":"Joe Bagodonuts", "password": "#@#@%!"}
@@ -10,7 +10,7 @@ Content-Type: application/json
 %}
 
 ###
-POST http://localhost:8080/attendees
+POST http://localhost:8080/api/attendees
 Content-Type: application/json
 
 {"name":"Sam Bagodonuts", "password": "@#@%!#"}
@@ -21,7 +21,7 @@ Content-Type: application/json
 %}
 
 ###
-POST http://localhost:8080/speakers
+POST http://localhost:8080/api/speakers
 Content-Type: application/json
 
 {"name":"George Carlin","bio": ""}
@@ -32,7 +32,7 @@ Content-Type: application/json
 %}
 
 ###
-POST http://localhost:8080/presentations
+POST http://localhost:8080/api/presentations
 Content-Type: application/json
 
 {"name":"How to Turn Unbearable Pain into Extra Income",
@@ -46,7 +46,7 @@ Content-Type: application/json
 %}
 
 ###
-POST http://localhost:8080/venues
+POST http://localhost:8080/api/venues
 Content-Type: application/json
 
 {"name":"Jungle Room","capacity": 100}
@@ -60,7 +60,7 @@ Content-Type: application/json
 < {% 
    client.global.set("start-time-secs", Math.floor(new Date().getTime() / 1000))
  %}
-POST http://localhost:8080/sessions
+POST http://localhost:8080/api/sessions
 Content-Type: application/json
 
 {
@@ -76,7 +76,7 @@ Content-Type: application/json
 %}
 
 ###
-PUT http://localhost:8080/attendees/{{attendee1-id}}/sessions/{{session-id}}
+PUT http://localhost:8080/api/attendees/{{attendee1-id}}/sessions/{{session-id}}
 Content-Type: application/json
 
 > {%
@@ -84,7 +84,7 @@ Content-Type: application/json
 %}
 
 ###
-PUT http://localhost:8080/sessions/{{session-id}}/attendees/{{attendee2-id}}
+PUT http://localhost:8080/api/sessions/{{session-id}}/attendees/{{attendee2-id}}
 Content-Type: application/json
 
 > {%
@@ -93,7 +93,7 @@ Content-Type: application/json
 
 
 ###
-GET http://localhost:8080/sessions/{{session-id}}/attendees
+GET http://localhost:8080/api/sessions/{{session-id}}/attendees
 
 > {%
     client.assert(response.status == 200)
@@ -102,7 +102,7 @@ GET http://localhost:8080/sessions/{{session-id}}/attendees
 
 
 ###
-GET http://localhost:8080/attendees/{{attendee1-id}}/sessions
+GET http://localhost:8080/api/attendees/{{attendee1-id}}/sessions
 
 > {%
     client.assert(response.status == 200)
@@ -110,57 +110,57 @@ GET http://localhost:8080/attendees/{{attendee1-id}}/sessions
 %}
 
 ###
-DELETE  http://localhost:8080/attendees/{{attendee1-id}}/sessions/{{session-id}}
+DELETE  http://localhost:8080/api/attendees/{{attendee1-id}}/sessions/{{session-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}
 
 ###
-DELETE http://localhost:8080/sessions/{{session-id}}/attendees/{{attendee2-id}}
+DELETE http://localhost:8080/api/sessions/{{session-id}}/attendees/{{attendee2-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}
 
 ###
-DELETE http://localhost:8080/sessions/{{session-id}}
+DELETE http://localhost:8080/api/sessions/{{session-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}
 
 ###
-DELETE http://localhost:8080/presentations/{{presentation-id}}
+DELETE http://localhost:8080/api/presentations/{{presentation-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}
 
 ###
-DELETE http://localhost:8080/speakers/{{speaker-id}}
+DELETE http://localhost:8080/api/speakers/{{speaker-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}
 
 ###
-DELETE http://localhost:8080/venues/{{venue-id}}
+DELETE http://localhost:8080/api/venues/{{venue-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}
 
 ###
-DELETE http://localhost:8080/attendees/{{attendee1-id}}
+DELETE http://localhost:8080/api/attendees/{{attendee1-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}
 
 ###
-DELETE http://localhost:8080/attendees/{{attendee2-id}}
+DELETE http://localhost:8080/api/attendees/{{attendee2-id}}
 
 > {%
-    client.assert(response.status == 200)
+    client.assert(response.status == 204)
 %}

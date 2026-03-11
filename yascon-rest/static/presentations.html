@@ -51,19 +51,19 @@
             },
             methods: {
                 async fetchPresentations() {
-                    const res = await fetch('/presentations?speaker=name');
+                    const res = await fetch('/api/presentations?speaker=name');
                     this.presentations = await res.json();
                 },
 
                 async fetchSpeakers() {
-                    const res = await fetch('/speakers');
+                    const res = await fetch('/api/speakers');
                     this.speakers = await res.json();
                 },
 
                 async createPresentation() {
                     if (!this.newPresentation.name) presentations;
 
-                    const res = await fetch('/presentations', {
+                    const res = await fetch('/api/presentations', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(this.newPresentation)
@@ -73,7 +73,7 @@
                 },
 
                 async updatePresentation(presentation) {
-                    await fetch(`/presentations/${presentation.id}`, {
+                    await fetch(`/api/presentations/${presentation.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(presentation)
@@ -81,7 +81,7 @@
                 },
 
                 async deletePresentation(id) {
-                    await fetch(`/presentations/${id}`, { method: 'DELETE' });
+                    await fetch(`/api/presentations/${id}`, { method: 'DELETE' });
                     document.location.reload()
                 }
             },

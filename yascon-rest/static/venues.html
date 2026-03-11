@@ -39,13 +39,13 @@
             methods: {
 
                 async fetchVenues() {
-                    const res = await fetch('/venues');
+                    const res = await fetch('/api/venues');
                     this.venues = await res.json();
                 },
 
                 async createVenue() {
                     if (!this.newVenue.name) venues;
-                    const res = await fetch('/venues', {
+                    const res = await fetch('/api/venues', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(this.newVenue)
@@ -54,7 +54,7 @@
                 },
 
                 async updateVenue(venue) {
-                    await fetch(`/venues/${venue.id}`, {
+                    await fetch(`/api/venues/${venue.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(venue)
@@ -62,7 +62,7 @@
                 },
 
                 async deleteVenue(id) {
-                    await fetch(`/venues/${id}`, { method: 'DELETE' });
+                    await fetch(`/api/venues/${id}`, { method: 'DELETE' });
                     this.venues = this.venues.filter(i => i.id !== id);
                 }
             },
